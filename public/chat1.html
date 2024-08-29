@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #e0e0e0;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #ffffff;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background-color: #0088cc;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .edit-profile-button {
+            padding: 10px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .edit-profile-button:hover {
+            background-color: #e64a19;
+        }
+
+        .contact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .contact-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: margin-right 0.3s ease;
+        }
+
+        .chat-area.map-open {
+            margin-right: 400px; /* Adjust this value to the width of the map */
+        }
+
+        .chat-header {
+            padding: 15px;
+            background-color: #0088cc;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background-color: #0088cc;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+
+        .message.other {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+
+        .message-input {
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .message-input button {
+            padding: 10px;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .message-input button:hover {
+            background-color: #005f7f;
+        }
+
+        .logout-button {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: background-color 0.2s;
+        }
+
+        .logout-button:hover {
+            background-color: #e64a19;
+        }
+
+        #map {
+            width: 400px;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            background-color: #ffffff;
+            border-left: 1px solid #ddd;
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+        }
+
+        #map.show {
+            transform: translateX(0);
+        }
+
+        #toggleMapButton {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: background-color 0.2s;
+            z-index: 10; /* Ensure the button is on top */
+        }
+
+        #toggleMapButton:hover {
+            background-color: #005f7f;
+        }
+
+        /* Styles for the popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 20; /* Ensure the popup is on top */
+        }
+
+        .popup.show {
+            display: block;
+        }
+
+        .popup-button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .popup-button:hover {
+            background-color: #005f7f;
+        }
+    </style>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <header class="sidebar-header">Chats</header>
+            <button class="edit-profile-button" id="editProfileButton">Edit Profile</button>
+            <ul class="contact-list" id="contactList">
+                <!-- List of online contacts will be dynamically added here -->
+            </ul>
+        </aside>
+        <main class="chat-area" id="chatArea">
+            <header class="chat-header" id="chatHeader">Select a contact</header>
+            <div class="chat-box" id="chatBox">
+                <!-- Chat messages will be dynamically added here -->
+            </div>
+            <div class="message-input">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button id="sendButton">Send</button>
+                <button id="locationButton" class="location-button">Start Location Sharing</button>
+            </div>
+        </main>
+        <div id="map"></div> <!-- Map container -->
+        <button id="toggleMapButton">Toggle Map</button> <!-- Toggle map button -->
+        <button class="logout-button" id="logoutButton">Logout</button>
+
+        <!-- Popup for stopping location sharing -->
+        <div class="popup" id="popup">
+            <p>Live location has been stopped.</p>
+            <button class="popup-button" id="popupButton">OK</button>
+        </div>
+    </div>
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const contactList = document.getElementById('contactList');
+            const chatBox = document.getElementById('chatBox');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const locationButton = document.getElementById('locationButton');
+            const chatHeader = document.getElementById('chatHeader');
+            const editProfileButton = document.getElementById('editProfileButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const mapContainer = document.getElementById('map');
+            const chatArea = document.getElementById('chatArea');
+            const toggleMapButton = document.getElementById('toggleMapButton');
+            const popup = document.getElementById('popup');
+            const popupButton = document.getElementById('popupButton');
+
+            let isSharingLocation = false;
+            let locationWatchId = null;
+
+            // WebSocket connection
+            const socket = new WebSocket('ws://localhost:8080'); // Example WebSocket connection
+
+            // Leaflet map setup
+            let map = L.map(mapContainer).setView([0, 0], 13); // Default view
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            let marker = L.marker([0, 0]).addTo(map);
+
+            // Function to add a message to the chat box
+            function addMessage(content, sender = 'user') {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', sender);
+                messageElement.textContent = content;
+                chatBox.appendChild(messageElement);
+                chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+            }
+
+            // Function to handle sending messages
+            function sendMessage() {
+                const messageText = messageInput.value.trim();
+                if (messageText) {
+                    addMessage(messageText);
+                    messageInput.value = '';
+
+                    // Send message to the server
+                    socket.send(JSON.stringify({
+                        type: 'message',
+                        content: messageText,
+                        recipient: chatHeader.textContent.replace('Chat with ', '')
+                    }));
+                }
+            }
+
+            // Function to handle sending location
+            function sendLocation(location) {
+                const locationMessage = `Location: ${location.latitude}, ${location.longitude}`;
+                addMessage(locationMessage);
+
+                // Send location to the server
+                socket.send(JSON.stringify({
+                    type: 'location',
+                    content: locationMessage,
+                    recipient: chatHeader.textContent.replace('Chat with ', '')
+                }));
+            }
+
+            // Function to start sharing live location
+            function startSharingLocation() {
+                if (navigator.geolocation) {
+                    locationWatchId = navigator.geolocation.watchPosition((position) => {
+                        const { latitude, longitude } = position.coords;
+                        marker.setLatLng([latitude, longitude]);
+                        map.setView([latitude, longitude], 13); // Center map on location
+                        sendLocation({ latitude, longitude });
+                    }, () => {
+                        addMessage('Unable to retrieve your location.');
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 5000
+                    });
+                    isSharingLocation = true;
+                    locationButton.textContent = 'End Location Sharing';
+                } else {
+                    addMessage('Geolocation is not supported by this browser.');
+                }
+            }
+
+            // Function to stop sharing live location
+            function stopSharingLocation() {
+                if (locationWatchId !== null) {
+                    navigator.geolocation.clearWatch(locationWatchId);
+                    locationWatchId = null;
+                    isSharingLocation = false;
+                    locationButton.textContent = 'Start Location Sharing';
+                    popup.classList.add('show');
+                }
+            }
+
+            // Event listener for the send button
+            sendButton.addEventListener('click', sendMessage);
+
+            // Handle pressing 'Enter' to send a message
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent default action
+                    sendMessage(); // Trigger sending message
+                }
+            });
+
+            // Event listener for the location button
+            locationButton.addEventListener('click', () => {
+                if (isSharingLocation) {
+                    stopSharingLocation();
+                } else {
+                    startSharingLocation();
+                }
+            });
+
+            // Handle contact clicks
+            contactList.addEventListener('click', (e) => {
+                if (e.target && e.target.matches('.contact-item')) {
+                    const contactName = e.target.getAttribute('data-contact');
+                    chatHeader.textContent = `Chat with ${contactName}`;
+                    chatBox.innerHTML = ''; // Clear previous chat
+                    // Optionally, load previous messages for the contact
+                }
+            });
+
+            // Function to populate contact list based on user type
+            function populateContacts(userType) {
+                fetch(`get_users.php?type=${userType}`)
+                    .then(response => response.json())
+                    .then(users => {
+                        contactList.innerHTML = ''; // Clear existing list
+                        users.forEach(user => {
+                            const contactItem = document.createElement('li');
+                            contactItem.className = 'contact-item';
+                            contactItem.setAttribute('data-contact', user);
+                            contactItem.textContent = user;
+                            contactList.appendChild(contactItem);
+                        });
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching ${userType}:`, error);
+                    });
+            }
+
+            // Event listener for the edit profile button
+            editProfileButton.addEventListener('click', () => {
+                window.location.href = 'profile.html'; // Redirect to profile1.html
+            });
+
+            // Event listener for the logout button
+            logoutButton.addEventListener('click', () => {
+                window.location.href = 'login.html'; // Redirect to login.html
+            });
+
+            // Event listener for the popup button
+            popupButton.addEventListener('click', () => {
+                popup.classList.remove('show');
+            });
+
+            // Simulate initial chat and populate contacts
+            chatHeader.textContent = 'Select a contact';
+            addMessage('Welcome! Click on a contact to start chatting.', 'other');
+
+            // WebSocket message handling
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'message') {
+                    addMessage(data.content, 'other');
+                }
+                if (data.type === 'location') {
+                    addMessage(data.content, 'other');
+                }
+            };
+
+            // Populate contacts on page load (if needed)
+            populateContacts('farmer'); // This line fetches and displays the list of farmers on page load
+
+            // Toggle map visibility
+            toggleMapButton.addEventListener('click', () => {
+                mapContainer.classList.toggle('show');
+                chatArea.classList.toggle('map-open');
+                toggleMapButton.textContent = mapContainer.classList.contains('show') ? 'Hide Map' : 'Show Map';
+            });
+        });
+    </script>
+</body>
+</html>

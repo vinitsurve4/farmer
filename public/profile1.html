@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #007bff, #00a2ff);
+            padding: 30px;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-pic-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 3px solid white;
+            cursor: pointer;
+            object-fit: cover;
+        }
+
+        .menu {
+            display: none;
+            position: absolute;
+            top: 110px; /* Adjust as needed */
+            left: 0;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            width: 150px; /* Adjust as needed */
+        }
+
+        .menu a, .menu button {
+            display: block;
+            padding: 10px;
+            text-align: center;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .menu a:hover, .menu button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .menu button:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar ul li.active a {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="url"] {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="url"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile-pic-container">
+                <img src="profile-picture.jpg" alt="Profile Picture" class="profile-pic" onclick="toggleMenu(event)">
+                <div class="menu" id="profileMenu">
+                    <button onclick="deleteProfilePic()">Delete Profile Picture</button>
+                    <label for="file-input" style="display: block; cursor: pointer;">Choose New Picture</label>
+                    <input type="file" id="file-input" style="display: none;" onchange="uploadProfilePic()">
+                </div>
+            </div>
+            <ul>
+                <li class="active"><a href="#">Account Details</a></li>
+                <li><a href="pass.html">Change Password</a></li>
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <h2>Account Settings</h2>
+            <form>
+                <label for="Username">Username</label>
+                <input type="text" id="Username" name="Username" value="">
+
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" value="">
+
+                <label for="mobile">Mobile No.</label>
+                <input type="text" id="mobile" name="mobile" value="">
+
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function deleteProfilePic() {
+            // Hide the profile picture and set a default image if needed
+            const profilePic = document.querySelector('.profile-pic');
+            profilePic.src = 'default-profile-pic.jpg'; // Replace with a path to a default image
+            alert('Profile picture deleted');
+            // Optionally, handle server-side deletion here
+        }
+
+        function uploadProfilePic() {
+            const input = document.getElementById('file-input');
+            const file = input.files[0];
+            if (file) {
+                // Logic to upload profile picture
+                alert('Profile picture updated');
+                // Update the profile picture source
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.profile-pic').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profileMenu');
+            const profilePicContainer = document.querySelector('.profile-pic-container');
+            if (!profilePicContainer.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

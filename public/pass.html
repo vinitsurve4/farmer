@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Password</title>
+    <!-- Include Font Awesome for the arrow icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Your existing styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative; /* Ensure positioning for the back arrow */
+        }
+
+        .registration-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 350px;
+            text-align: center;
+            max-width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #333333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #666666;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #cccccc;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-group button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-group button:active {
+            background-color: #004494;
+        }
+
+        .btn-group button i {
+            margin-right: 8px;
+        }
+
+        .error-message {
+            color: red;
+            margin: 10px 0;
+            font-size: 14px;
+            display: none; /* Hide by default */
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Style for the back arrow */
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #007bff;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .back-arrow:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <a href="profile.html" class="back-arrow">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="registration-container">
+        <div class="error-message" id="error-message">Email ID is not correct</div>
+        <h2>Change Password</h2>
+        <form id="passwordForm" onsubmit="return validateEmail(event)">
+            <div class="form-group">
+                <input type="email" id="email-id" name="email-id" placeholder="Enter Email ID" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="new-password" name="new-password" placeholder="New Password" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm Password" required>
+            </div>
+            <div class="btn-group">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validateEmail(event) {
+            event.preventDefault(); // Prevent form from submitting traditionally
+
+            const email = document.getElementById("email-id").value;
+            const newPassword = document.getElementById("new-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+            const errorMessage = document.getElementById("error-message");
+
+            // Simple client-side validation for matching passwords
+            if (newPassword !== confirmPassword) {
+                errorMessage.textContent = "Passwords do not match!";
+                errorMessage.style.display = "block";
+                return false;
+            }
+
+            // AJAX request to the server
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "check_email.php", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    if (xhr.responseText === "success") {
+                        alert("Password changed successfully!");
+                    } else {
+                        errorMessage.textContent = "Email ID is not correct";
+                        errorMessage.style.display = "block";
+                    }
+                }
+            };
+            xhr.send("email=" + encodeURIComponent(email) + "&newPassword=" + encodeURIComponent(newPassword));
+        }
+    </script>
+</body>
+</html>

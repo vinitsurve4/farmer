@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 350px;
+            max-width: 100%;
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 26px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn-group {
+            margin-top: 20px;
+        }
+        .btn-group button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-group button:hover {
+            background-color: #0056b3;
+        }
+        .btn-group button:active {
+            background-color: #004494;
+            transform: scale(0.98);
+        }
+        .btn-group button i {
+            margin-right: 8px;
+        }
+        .error-message {
+            color: #ff4d4d;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .login-option {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .login-option a {
+            display: block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .login-option a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="error-message" id="error-message"></div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+        <div class="btn-group login-option">
+            <button onclick="login('farmer')"><i class="fas fa-sign-in-alt"></i> Login as Farmer</button>
+            <button onclick="login('vendor')"><i class="fas fa-sign-in-alt"></i> Login as Vendor</button>
+        </div>
+        <div>
+            <a href="registration.html">Not Registered Yet?</a>
+        </div>
+    </div>
+
+    <script>
+        function login(userType) {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            // Clear previous error message
+            errorMessage.textContent = '';
+
+            if (!username || !password) {
+                errorMessage.textContent = 'Please enter both username and password.';
+                return;
+            }
+
+            // Prepare the data to send
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('userType', userType);
+
+            // Send data to PHP script
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'Login successful') {
+                    window.location.href = userType === 'farmer' ? 'chat1.html' : 'vendor_dashboard.html';  // Redirect based on user type
+                } else {
+                    errorMessage.textContent = 'Invalid credentials. Redirecting to registration page...';
+                    setTimeout(() => {
+                        window.location.href = 'registration.html'; // Redirect to registration page after error message
+                    }, 2000); // 2 seconds delay to show the error message
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'An error occurred during login.';
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
